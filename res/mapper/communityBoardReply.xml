@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reply">
+
+<resultMap id="boardReplyMap" type="CommunityBoardReplyVo">
+    <id property="replyNo" column="REPLY_NO"/>
+    <result property="commubNo" column="COMMUB_NO"/>
+    <result property="replyContent" column="REPLY_CONTENT"/>
+    <result property="replyWriter" column="REPLY_WRITER"/>
+    <result property="replyDate" column="REPLY_DATE"/>
+    <result property="delyn" column="DELYN"/>
+    <association property="member" javaType="MemberVo">
+        <result property="memId" column="MEM_ID"/>
+        <result property="memNick" column="MEM_NICK"/>
+        <!-- 필요하다면 추가 필드 매핑 -->
+    </association>
+</resultMap>
+
+<select id="boardReplyList" parameterType="int" resultMap="boardReplyMap">
+    SELECT r.*, m.MEM_ID, m.MEM_NICK
+    FROM COMMUNITY_BOARD_REPLY r
+    JOIN MEMBER m ON r.MEM_ID = m.MEM_ID
+    WHERE r.COMMUB_NO = #{commubNo}
+      AND r.DELYN = 'N'
+    ORDER BY r.REPLY_DATE ASC
+</select>
+    
+    <!-- 댓글 등록 -->
+    <insert id="boardInsertReply" parameterType="CommunityBoardReplyVo">
+        INSERT INTO COMMUNITY_BOARD_REPLY (
+            REPLY_NO,
+            COMMUB_NO,
+            REPLY_CONTENT,
+            REPLY_WRITER,
+            REPLY_DATE,
+            DELYN,
+            MEM_ID
+        ) VALUES (
+            COMMUNITY_BOARD_REPLY_SEQ.NEXTVAL,
+            #{commubNo},
+            #{replyContent},
+            #{replyWriter, jdbcType=VARCHAR},
+            SYSDATE,
+            'N',
+            #{member.memId}
+        )
+    </insert>
+    
+    <!-- 댓글 수정 -->
+    <update id="boardUpdateReply" parameterType="CommunityBoardReplyVo">
+		UPDATE COMMUNITY_BOARD_REPLY
+		SET	REPLY_CONTENT = #{replyContent},
+			REPLY_DATE = SYSDATE
+		WHERE REPLY_NO = #{replyNo}
+	</update>
+    
+    <!-- 댓글 논리삭제 -->
+    <update id="boardDeleteReply" parameterType="int">
+        UPDATE COMMUNITY_BOARD_REPLY
+        SET DELYN = 'Y'
+        WHERE REPLY_NO = #{replyNo}
+    </update>
+    
+    
+
+
+</mapper>

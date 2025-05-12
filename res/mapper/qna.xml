@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="qna">
+
+	<resultMap id="qnaResultMap" type="QnaVO">
+	    <id property="qnaNo" column="QNA_NO"/>
+	    <result property="qnaTitle" column="QNA_TITLE"/>
+	    <result property="qnaContent" column="QNA_CONTENT"/>
+	    <result property="createDate" column="CREATE_DATE"/>
+	    <result property="memNick" column="MEM_NICK"/> <!-- memNick을 매핑 -->
+	</resultMap>
+	
+	<insert id="qnaInsert" parameterType="QnaVo">
+		INSERT INTO QNA
+		    (QNA_NO, MEM_NO, QNA_TITLE, QNA_CONTENT, CREATE_DATE)
+		    VALUES (
+		        (SELECT NVL(MAX(QNA_NO), 0) + 1 FROM QNA),
+		        #{memNo},
+		        #{qnaTitle},
+		        #{qnaContent},
+		        SYSDATE
+		    )
+	</insert>
+	
+	<select id="qnaList" resultMap="qnaResultMap">
+		SELECT 
+	        Q.QNA_NO,
+	        Q.QNA_TITLE,
+	        Q.MEM_NO,
+	        M.MEM_NICK,
+	        Q.CREATE_DATE,
+	        Q.QNA_ANSWER
+	    FROM QNA Q, MEMBER M
+	    WHERE Q.MEM_NO = M.MEM_NO
+	    AND Q.DELYN = 'N'
+	    ORDER BY CREATE_DATE DESC
+	</select>
+	
+	<select id="qnaDetail" parameterType="int" resultMap="qnaResultMap">
+		SELECT 
+		    Q.QNA_NO,
+		    Q.QNA_TITLE,
+		    Q.QNA_CONTENT,
+		    M.MEM_NICK,
+		    Q.QNA_ANSWER,
+		    Q.CREATE_DATE,
+		    Q.UPDATE_DATE,
+		    Q.MCREATE_DATE
+		FROM QNA Q, MEMBER M
+		WHERE Q.MEM_NO = M.MEM_NO
+		AND Q.DELYN = 'N'
+		AND Q.QNA_NO = #{qnaNo}
+	</select>
+	
+	<update id="qnaUpdate" parameterType="QnaVo">
+		UPDATE QNA
+		    SET QNA_TITLE = #{qnaTitle},
+		        QNA_CONTENT = #{qnaContent},
+		        UPDATE_DATE = SYSDATE
+	    WHERE QNA_NO = #{qnaNo}
+	</update>
+	
+	<update id="qnaDelete" parameterType="int">
+		UPDATE QNA
+	        SET DELYN = 'Y'
+	        WHERE QNA_NO = #{qnaNo}
+	</update>
+	
+	<update id="qnaInsertAnswer" parameterType="QnaVo">
+		UPDATE QNA
+			SET QNA_ANSWER = #{qnaAnswer}
+		WHERE QNA_NO = #{qnaNo}
+	</update>
+	
+	<select id="qnaListByMember" parameterType="int" resultMap="qnaResultMap">
+		SELECT 
+	        Q.QNA_NO,
+	        Q.QNA_TITLE,
+	        Q.MEM_NO,
+	        M.MEM_NICK,
+	        Q.CREATE_DATE,
+	        Q.QNA_ANSWER
+	    FROM QNA Q, MEMBER M
+	    WHERE Q.MEM_NO = M.MEM_NO
+	    AND Q.DELYN = 'N'
+	    AND Q.MEM_NO = #{memNo}
+	    ORDER BY CREATE_DATE DESC
+	</select>
+	
+	
+</mapper>

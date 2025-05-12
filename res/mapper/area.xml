@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="area">
+	<select id="selectAllDistricts" resultType="AreaVo">
+		SELECT *
+        FROM AREA
+        WHERE AREA_PARENT_NO IS NULL
+        ORDER BY AREA_NO
+	</select>
+	
+	<select id="selectDongsByDistrict" parameterType="int" resultType="AreaVo" useCache="false" flushCache="true">
+		SELECT *
+        FROM AREA
+        WHERE AREA_PARENT_NO = #{areaParentNo}
+		ORDER BY AREA_NO
+	</select>
+	
+	<select id="selectAreaByAreaNo" parameterType="int" resultType="AreaVo" useCache="false" flushCache="true">
+        SELECT 
+            AREA_NO,
+            AREA_NAME,
+            AREA_PARENT_NO,
+            CREATE_DATE
+        FROM AREA
+        WHERE AREA_NO = #{areaNo}
+    </select>
+</mapper>

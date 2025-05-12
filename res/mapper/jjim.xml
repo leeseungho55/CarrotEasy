@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jjim">
+
+	<insert id="jjimOn" parameterType="JJimVo">
+		INSERT INTO JJIM VALUES(#{memNo}, #{prodNo}, SYSDATE)
+	</insert>
+
+	<delete id="jjimOut">
+		DELETE FROM JJIM 
+		WHERE MEM_NO = #{memNo} AND PROD_NO =#{prodNo}
+	</delete>
+	<select id="getJJimCount" parameterType="int" resultType="int">
+		SELECT COUNT(*)
+		FROM JJIM
+		WHERE PROD_NO = #{prodNo}
+	</select>
+	<select id="checkJJim"  parameterType="JJimVo" resultType="int">
+		SELECT COUNT(*) 
+		FROM JJIM 
+		WHERE mem_no = #{memNo} 
+		AND prod_no = #{prodNo}
+			
+	</select>
+</mapper>

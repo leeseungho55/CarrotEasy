@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="notice">
+
+	<select id="noticeList" resultType="NoticeVo">
+		SELECT *
+		FROM NOTICE
+		WHERE NOTI_DELYN = 'N'
+	</select>
+	
+	<insert id="noticeWrite" parameterType="NoticeVo">
+		INSERT INTO NOTICE (NOTI_NO, MEM_NO, NOTI_TITLE, NOTI_CONTENT, CREATE_DATE, NOTI_DELYN)
+		VALUES (NOTICE_NOTI_NO_SEQ.NEXTVAL, 1, #{notiTitle}, #{notiContent}, SYSDATE, 'N')
+	</insert>
+	
+	<select id="getNotice" parameterType="int" resultType="NoticeVo">
+		SELECT *
+		FROM NOTICE
+		WHERE NOTI_NO = #{notiNo}
+		AND NOTI_DELYN = 'N'
+	</select>
+	
+	<update id="noticeUpdate" parameterType="NoticeVo">
+	    UPDATE NOTICE
+	    SET NOTI_TITLE = #{notiTitle},
+	        NOTI_CONTENT = #{notiContent},
+	        UPDATE_DATE = SYSDATE
+	    WHERE NOTI_NO = #{notiNo}
+  	</update>
+  	
+  	<update id="noticeDelete" parameterType="int">
+	    UPDATE NOTICE
+	    SET NOTI_DELYN = 'Y',
+	        UPDATE_DATE = SYSDATE
+	    WHERE NOTI_NO = #{notiNo}
+	</update>
+	
+</mapper>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <!-- 공유 폴더를 가상 경로로 매핑 -->
+    <Resources>
+        <PreResources className="org.apache.catalina.webresources.DirResourceSet"
+                      base="\\192.168.145.21\carrot"
+                      webAppMount="/shared-files" />
+      <PreResources className="org.apache.catalina.webresources.DirResourceSet"
+                      base="\\192.168.145.21\carrot"
+                      webAppMount="/uploads" />
+    </Resources>
+    
+    <!-- 기타 필요한 설정들 -->
+    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+</Context>

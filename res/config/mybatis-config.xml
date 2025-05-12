@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration 
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<properties resource="db.properties" />
+	
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+	</settings>
+	
+	<typeAliases>
+		<typeAlias type="kr.or.ddit.member.vo.MemberVo" alias="MemberVo" />
+		<typeAlias type="kr.or.ddit.report.vo.ReportVo" alias="ReportVo" />
+		<typeAlias type="kr.or.ddit.community.community_index.vo.CommunityVo" alias="CommunityVo" />
+		<typeAlias type="kr.or.ddit.community.community_report.vo.CommunityReportVo" alias="CommunityReportVo" />
+		<typeAlias type="kr.or.ddit.community.community_board.vo.CommunityBoardVo" alias="CommunityBoardVo" />
+		<typeAlias type="kr.or.ddit.community.community_reply.vo.CommunityBoardReplyVo" alias="CommunityBoardReplyVo" />
+		<typeAlias type="kr.or.ddit.report.vo.ReportPagingVo" alias="ReportPagingVo" />
+		<typeAlias type="kr.or.ddit.report.vo.MVo" alias="MVo"/>
+		<typeAlias type="kr.or.ddit.chatting.vo.ChattingRoomVo" alias="ChattingRoomVo" />
+		<typeAlias type="kr.or.ddit.chatting.vo.MessageVo" alias="MessageVo" />
+		<typeAlias type="kr.or.ddit.admember.vo.AdmemberVo" alias="AdmemberVo" />
+		<typeAlias type="kr.or.ddit.adboard.vo.AdboardVo" alias="AdboardVo" />
+		<typeAlias type="kr.or.ddit.adboard.vo.SwiperAdVo" alias="SwiperAdVo" />
+		<typeAlias type="kr.or.ddit.notice.vo.NoticeVo" alias="NoticeVo" />
+		<typeAlias type="kr.or.ddit.banner.vo.BannerVo" alias="BannerVo" />
+		<typeAlias type="kr.or.ddit.member.vo.EmailVerificationVo" alias="EmailVerificationVo" />
+		<typeAlias type="kr.or.ddit.adboard.vo.AdboardVo" alias="AdboardVo" />
+		<typeAlias type="kr.or.ddit.notice.vo.NoticeVo" alias="NoticeVo" />
+		<typeAlias type="kr.or.ddit.prod.vo.ProdVo" alias="ProdVo" />
+		<typeAlias type="kr.or.ddit.prod.vo.ProdImageVo" alias="ProdImageVo" />
+		<typeAlias type="kr.or.ddit.area.vo.AreaVo" alias="AreaVo" />
+		<typeAlias type="kr.or.ddit.cate.vo.CateVo" alias="CateVo" />
+		<typeAlias type="kr.or.ddit.file.vo.FileVo" alias="FileVo" />
+		<typeAlias type="kr.or.ddit.qna.vo.QnaVo" alias="QnaVo" />
+		<typeAlias type="kr.or.ddit.chatting.vo.ProductVo" alias="ProductVo" />
+		<typeAlias type="kr.or.ddit.prod.vo.PaymentDataVo" alias="PaymentDataVo"/>
+		<typeAlias type="kr.or.ddit.prod.vo.JJimVo" alias="JJimVo"/>
+		<typeAlias type="kr.or.ddit.prod.vo.ProdPurchaseVo" alias="ProdPurchaseVo"/>
+		<typeAlias type="kr.or.ddit.delivery.vo.DeliveryVo" alias="DeliveryVo"/>
+		<typeAlias type="kr.or.ddit.mystore.vo.ProfileVo" alias="ProfileVo"/>
+		<typeAlias type="kr.or.ddit.mystore.vo.StoreVo" alias="StoreVo"/>
+		<typeAlias type="kr.or.ddit.review.vo.HasReviewVo" alias="HasReviewVo"/>
+		<typeAlias type="kr.or.ddit.review.vo.GetSellerVo" alias="GetSellerVo"/>
+		<typeAlias type="kr.or.ddit.review.vo.ReviewVo" alias="ReviewVo"/>
+	</typeAliases>
+	
+	<!-- 
+	    POOLED : MyBatis 자체 DB 커넥션을 사용한다.
+	                        미리 DB 커넥션 객체를 생성해 두고 요청하면 즉시 반환한다.
+	                        데이터베이스 연결을 초기화하고 사용자를 인증하는 과정이 없기 때문에 속도가 빠르다.
+	 -->
+	
+	<environments default="dev">
+		<environment id="dev">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="${driver}"/>
+				<property name="url" value="${url}"/>
+				<property name="username" value="${user}"/>
+				<property name="password" value="${pass}"/>
+				<!-- 활성화된 최대 커넥션 수 -->
+				<property name="poolMaximumActiveConnections" value="10"/>
+				<!-- 유휴상태에서의  최대 커넥션 수 -->
+				<property name="poolMaximumIdleConnections" value="100"/>
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers>
+		<mapper resource="mapper/member.xml"/>
+		<mapper resource="mapper/community.xml"/>
+		<mapper resource="mapper/communityReport.xml"/>
+		<mapper resource="mapper/communityBoard.xml"/>
+		<mapper resource="mapper/communityBoardReply.xml"/>
+		<mapper resource="mapper/communityBoardGood.xml"/>
+		<mapper resource="mapper/report.xml"/>
+		<mapper resource="mapper/chat.xml"/>
+		<mapper resource="mapper/admember.xml"/>
+		<mapper resource="mapper/adboard.xml"/>
+		<mapper resource="mapper/notice.xml"/>
+		<mapper resource="mapper/banner.xml"/>
+		<mapper resource="mapper/email_verification.xml"/>
+		<mapper resource="mapper/adboard.xml"/>
+		<mapper resource="mapper/notice.xml"/>
+		<mapper resource="mapper/prod.xml"/>
+		<mapper resource="mapper/prod_image.xml"/>
+		<mapper resource="mapper/area.xml"/>
+		<mapper resource="mapper/cate.xml"/>
+		<mapper resource="mapper/file.xml"/>
+		<mapper resource="mapper/qna.xml"/>
+		<mapper resource="mapper/pay.xml"/>
+		<mapper resource="mapper/jjim.xml"/>
+		<mapper resource="mapper/delivery.xml"/>
+		<mapper resource="mapper/mystore.xml"/>
+		<mapper resource="mapper/review.xml"/>
+		<mapper resource="mapper/prod_purchase.xml"/>
+		<mapper resource="mapper/mypage.xml"/>
+	</mappers>
+
+</configuration>

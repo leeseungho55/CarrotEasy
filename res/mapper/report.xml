@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 리스트 출력 시 vo와 매핑시켜야함-->
+
+<mapper namespace="report">
+    <resultMap id="reportResultMap" type="ReportVo">
+        <result property="repNo" column="REP_NO"/>
+        <result property="memId" column="MEM_ID"/>
+        <result property="prodTitle" column="PROD_TITLE"/>
+        <result property="memNo" column="MEM_NO"/>
+        <result property="repTitle" column="REP_TITLE"/>
+        <result property="repContent" column="REP_CONTENT"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+    </resultMap>
+
+<insert id="insert" parameterType="ReportVo">
+	insert into REPORT(REP_NO, PROD_TITLE, MEM_NO, MEM_ID, REP_TITLE, REP_CONTENT, CREATE_DATE)
+	values ((SELECT NVL(MAX(rep_no), 0) + 1 AS new_rep_no FROM report),
+	#{prodTitle},#{memNo},#{memId},#{repTitle},#{repContent},sysdate)
+</insert>
+
+<select id="list" resultMap="reportResultMap">
+    select * 
+    from report 
+    where MEM_No= #{memNo}
+	order by rep_no desc
+</select>
+
+<select id="updateForm" resultMap="reportResultMap">
+	select *
+	from report
+	where rep_no = #{rep_no}
+</select>
+
+<delete id="deleteReport">
+	delete from report where rep_no = #{rep_no}
+</delete>
+
+<select id="totalPosts" resultType="int">
+	select count(*) from report
+</select>
+<!-- <, >, & 같은 XML에서 의미가 있는 기호들을 문자 데이터로 처리하게 해주는 기능 -->
+<select id="pagingReport" parameterType="ReportPagingVo" resultMap="reportResultMap">
+  <![CDATA[
+    SELECT *
+    FROM (
+        SELECT ROWNUM AS rnum, inner.*
+        FROM (
+            SELECT *
+            FROM REPORT
+            WHERE MEM_NO = #{memNo}
+            ORDER BY REP_NO DESC
+        ) inner
+        WHERE ROWNUM <= #{endRow}
+    )
+    WHERE rnum >= #{startRow}
+  ]]>
+</select>
+
+<select id="pagingReportAll" parameterType="ReportPagingVo" resultMap="reportResultMap">
+  <![CDATA[
+	SELECT *
+	FROM (
+	    SELECT ROWNUM AS rnum, B.*
+	    FROM (
+	        SELECT *
+	        FROM REPORT
+	        ORDER BY REP_NO DESC
+	    ) B
+	    WHERE ROWNUM <= 10
+	) A
+	WHERE A.rnum >= 1
+  ]]>
+</select>
+
+<select id="role1Member" resultType="MVo">
+	SELECT MEM_NO
+	FROM MEMBER
+	WHERE MEM_ROLE=1
+</select>
+
+<select id="findMemId" resultType="String">
+	SELECT A.MEM_ID
+	FROM MEMBER A
+	WHERE A.MEM_NO = #{memNo}
+</select> 
+
+</mapper>

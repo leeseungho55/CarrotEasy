@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="banner">
+	<select id="bannerList" resultType="BannerVo">
+		SELECT *
+		FROM BANNER
+		WHERE BAN_DELYN = 'N'
+		ORDER BY BAN_NO
+	</select>
+	
+	<select id="bannerListAll" resultType="BannerVo">
+		SELECT *
+		FROM BANNER
+		ORDER BY BAN_NO
+	</select>
+	
+	<insert id="bannerInsert" parameterType="BannerVo">
+		INSERT INTO BANNER (BAN_IMG, BAN_URL, BAN_NO, AD_NO)
+    	VALUES (#{banImg}, #{banUrl}, (SELECT NVL(MAX(BAN_NO), 0) + 1 FROM BANNER), #{adNo})
+	</insert>
+	
+	<update id="bannerUpdate" parameterType="BannerVo">
+		UPDATE BANNER
+		SET BAN_DELYN = #{banDelyn}
+		WHERE BAN_NO = #{banNo}
+	</update>
+</mapper>

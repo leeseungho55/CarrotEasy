@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="chat">
+
+    <!-- 채팅방 생성 -->
+    <insert id="createChattingRoom" parameterType="ChattingRoomVo">
+        INSERT INTO chatting_room (
+            chat_no, prod_no, mem_no, create_date
+        )
+        VALUES (
+            (SELECT NVL(MAX(chat_no), 0) + 1 FROM chatting_room),
+            #{prodNo},
+            #{memNo},
+            SYSDATE
+        )
+    </insert>
+    
+    <!-- 메시지 전송 -->
+    <insert id="messageSend" parameterType="MessageVo">
+        INSERT INTO MESSAGE 
+        VALUES(
+            (SELECT NVL(MAX(MES_NO), 0) + 1 FROM MESSAGE),
+            #{chatNo},
+            #{chatContent},
+            SYSDATE,
+            NULL,
+            0,
+            #{senderNo},
+            #{receiverNo}
+        )
+    </insert>
+    
+    <!-- 메시지 리스트 출력 -->
+    <select id="printMessageList" parameterType="int" resultType="MessageVo">
+        SELECT CHAT_CONTENT, SENDER_NO, RECEIVER_NO,START_DATE
+		  FROM MESSAGE
+		WHERE CHAT_NO = #{chatNo}
+	    ORDER BY START_DATE ASC	
+    </select>
+	<!-- 채팅방 업데이트 -->
+	<update id="updateChattingRoom" parameterType="int">
+		UPDATE CHATTING_ROOM
+    	SET UPDATE_DATE =SYSDATE
+   		WHERE CHAT_NO = #{chatNo}
+    </update>
+    <!-- 메시지 읽음 처리 -->
+    <update id="readMessage" parameterType="int[]">
+		UPDATE MESSAGE
+    	SET READ_YN = 1
+   		WHERE CHAT_NO = #{array[0]}
+      	AND RECEIVER_NO = #{array[1]}
+      	AND READ_YN = 0
+    </update>
+    
+    <!-- 회원 정보 가져오기 -->
+    <select id="getMemData" parameterType="String" resultType="ChattingRoomVo">
+        SELECT 
+            MEM_NO AS memNo,
+            MEM_NICK AS memNick
+        FROM MEMBER
+        WHERE MEM_ID = #{memId}
+    </select>
+    
+    <!-- 채팅방 존재 여부 체크 -->
+    <select id="isNotNull" parameterType="int" resultType="int">
+        SELECT 1
+        FROM chatting_room
+        WHERE PROD_NO = #{prodNo}
+    </select>
+    
+    <!-- 제품에 해당하는 회원 번호 가져오기 -->
+    <select id="prodMemNo" parameterType="int" resultType="int">
+        SELECT MEM_NO
+        FROM PROD
+        WHERE PROD_NO = #{prodNo}
+    </select>
+
+    
+    <!-- 채팅 리스트 조회 -->
+	<select id="chatList" parameterType="int" resultType="ChattingRoomVo">
+	    SELECT 
+	        A.CHAT_NO AS chatNo,
+	        A.PROD_NO AS prodNo,
+	        A.MEM_NO AS buyerMemNo,
+	        A.CREATE_DATE AS createDate,
+	        A.UPDATE_DATE AS updateDate,
+	        B.MEM_NO AS sellerMemNo,
+	        BUYER.MEM_NICK AS buyerNick,
+	        SELLER.MEM_NICK AS sellerNick,
+	        (SELECT SUBSTR(CHAT_CONTENT, 1, 10)
+	         FROM MESSAGE D 
+	         WHERE D.CHAT_NO = A.CHAT_NO 
+	         ORDER BY START_DATE DESC 
+	         FETCH FIRST 1 ROW ONLY) AS lastChatContent,
+	        CASE 
+	            WHEN A.MEM_NO = #{memNo} THEN 'BUYER'
+	            WHEN B.MEM_NO = #{memNo} THEN 'SELLER'
+	            ELSE 'OTHER'
+	        END AS myRole
+	    FROM CHATTING_ROOM A
+	    JOIN PROD B ON A.PROD_NO = B.PROD_NO
+	    JOIN MEMBER BUYER ON A.MEM_NO = BUYER.MEM_NO
+	    JOIN MEMBER SELLER ON B.MEM_NO = SELLER.MEM_NO
+	    WHERE A.MEM_NO = #{memNo}
+	       OR B.MEM_NO = #{memNo}
+	    ORDER BY NVL(A.UPDATE_DATE, A.CREATE_DATE) DESC
+	</select>
+	<select id="getProductInfo" parameterType="int" resultType="productVo">
+		select PROD_TITLE, PROD_PRICE, PROD_LOCATION
+		  FROM PROD
+		 WHERE PROD_NO = #{prodNo}
+	</select>
+	
+	
+	<select id="selectChatMembersByProdNo" parameterType="int" resultType="MemberVo">
+	    SELECT DISTINCT m.mem_no AS memNo, m.mem_nick AS memNick
+	    FROM chatting_room cr
+	    JOIN MEMBER m ON cr.mem_no = m.mem_no
+	    WHERE cr.prod_no = #{prodNo}
+	</select>
+
+</mapper>

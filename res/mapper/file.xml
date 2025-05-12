@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="file">
+	<insert id="fileInsert" parameterType="FileVo">
+		INSERT INTO FILES (FILE_NO, FILE_ORG, FILE_SAVE, FILE_TYPE, CREATE_DATE)
+        VALUES ((SELECT NVL(MAX(FILE_NO), 0) + 1 FROM FILES), #{fileOrg}, #{fileSave}, #{fileType}, SYSDATE)
+	</insert>
+	
+	<select id="getLastFileNo" resultType="int">
+	    SELECT MAX(FILE_NO) FROM FILES
+	</select>
+	
+	<select id="getFileByFileNo" parameterType="int" resultType="FileVo" useCache="false">
+	    SELECT 
+	        FILE_NO, 
+	        FILE_ORG, 
+	        FILE_SAVE, 
+	        FILE_TYPE, 
+	        CREATE_DATE
+	    FROM FILES
+	    WHERE FILE_NO = #{fileNo}
+	</select>
+	
+	<delete id="fileDelete" parameterType="int">
+        DELETE FROM FILES 
+        WHERE FILE_NO = #{fileNo}
+    </delete>
+</mapper>

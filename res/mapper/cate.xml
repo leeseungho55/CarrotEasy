@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cate">
+	<select id="selectAllCategories" resultType="CateVo">
+		SELECT *
+        FROM CATEGORY
+        WHERE CATE_PARENT_NO IS NULL
+        ORDER BY CATE_NO
+	</select>
+	
+	<select id="selectSubcategoriesByParent" parameterType="int" resultType="CateVo" useCache="false" flushCache="true">
+		SELECT *
+        FROM CATEGORY
+        WHERE CATE_PARENT_NO = #{cateParentNo}
+		ORDER BY CATE_NO
+	</select>
+	
+	<select id="selectCategoryByCateNo" parameterType="int" resultType="CateVo">
+	    SELECT 
+	        CATE_NO, 
+	        CATE_NAME, 
+	        CATE_PARENT_NO,
+	        CREATE_DATE
+	    FROM CATEGORY
+	    WHERE CATE_NO = #{cateNo}
+	</select>
+	
+	<insert id="categoryInsert" parameterType="CateVo">
+	    INSERT INTO CATEGORY (CATE_NO, CATE_NAME, CATE_PARENT_NO, CREATE_DATE)
+	    VALUES (#{cateNo}, #{cateName}, #{cateParentNo, jdbcType=NULL}, SYSDATE)
+	</insert>
+	
+	<update id="categoryUpdate" parameterType="CateVo">
+	    UPDATE CATEGORY
+	    SET
+	        CATE_NAME = #{cateName},
+	        CATE_PARENT_NO = #{cateParentNo, jdbcType=NULL}
+	    WHERE CATE_NO = #{cateNo}
+	</update>
+	
+	<select id="getMaxCateNoForParentNull" resultType="Integer">
+	    SELECT MAX(CATE_NO)
+	    FROM CATEGORY
+	    WHERE CATE_PARENT_NO IS NULL
+	</select>
+	
+	<select id="getMaxCateNoForParentNotNull" parameterType="int" resultType="Integer">
+	    SELECT MAX(CATE_NO)
+	    FROM CATEGORY
+	    WHERE CATE_PARENT_NO = #{cateParentNo}
+	</select>
+	
+	<delete id="deleteCategory" parameterType="int">
+	    DELETE FROM CATEGORY WHERE CATE_NO = #{cateNo}
+	</delete>
+	
+</mapper>

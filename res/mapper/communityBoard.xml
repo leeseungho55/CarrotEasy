@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="communityBoard">
+
+	<resultMap id="CommunityBoardResultMap"	type="CommunityBoardVo">
+		<id property="commubNo" column="commub_no" />
+		<result property="commuNo" column="commu_no" />
+		<result property="commubTitle" column="commub_title" />
+		<result property="commubContent" column="commub_content" />
+		<result property="commubGood" column="commub_good" />
+		<result property="commubCnt" column="commub_cnt" />
+		<result property="createDate" column="create_date" />
+		<result property="updateDate" column="update_date" />
+		<result property="delyn" column="delyn" />
+		<result property="commuRegion" column="commu_region"/>
+
+		<association property="member" javaType="MemberVo">
+			<id property="memNo" column="mem_no" />
+			<result property="memId" column="mem_id" />
+			<result property="memNick" column="mem_nick" />
+			<!-- 필요한 다른 필드도 추가 가능 -->
+		</association>
+	</resultMap>
+	<!-- 동적쿼리 -->
+	<sql id="dynamicCondition">
+		<choose>
+			<when test="stype eq 'commubTitle'">
+				AND COMMUB_TITLE LIKE '%' || #{sword} || '%'
+			</when>
+			<when test="stype eq 'commubContent'">
+				AND COMMUB_CONTENT LIKE '%' || #{sword} || '%'
+			</when>
+			<otherwise>
+				AND 1 = 1
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="communitySelectList" resultMap="CommunityBoardResultMap">
+		SELECT b.*, m.mem_no, m.mem_id, m.mem_nick
+		FROM
+		COMMUNITY_BOARD b
+		LEFT JOIN MEMBER m ON b.mem_no = m.mem_no
+		WHERE
+		b.COMMU_NO = #{commuNo}
+		AND b.DELYN = 'N'
+		ORDER BY b.CREATE_DATE DESC
+	</select>
+
+	<insert id="communityBoardInsert" parameterType="CommunityBoardVo">
+		INSERT INTO COMMUNITY_BOARD (
+								COMMUB_NO,
+								COMMU_NO,
+								COMMUB_TITLE,	
+								COMMUB_CONTENT,
+								COMMUB_GOOD,
+								COMMUB_CNT,
+								CREATE_DATE,
+								UPDATE_DATE,
+								DELYN,
+								MEM_NO
+							) VALUES (
+								COMMUNITY_BOARD_SEQ.NEXTVAL,
+								#{commuNo},
+								#{commubTitle},
+								#{commubContent},
+								0,
+								0,
+								SYSDATE,
+								SYSDATE,
+								'N',
+								#{memNo}
+							)
+	</insert>
+
+	<!-- 상세조회 -->
+	<select id="communityBoardByNo" parameterType="int"	resultMap="CommunityBoardResultMap">
+		SELECT b.*, m.mem_no, m.mem_id, m.mem_nick
+		FROM COMMUNITY_BOARD b
+		LEFT JOIN MEMBER m ON b.mem_no = m.mem_no
+		WHERE b.COMMUB_NO = #{commubNo}
+		AND b.DELYN = 'N'
+	</select>
+
+	<update id="communityBoardUpdate"
+		parameterType="CommunityBoardVo">
+		UPDATE COMMUNITY_BOARD
+		SET COMMUB_TITLE = #{commubTitle},
+			COMMUB_CONTENT = #{commubContent},
+			UPDATE_DATE = SYSDATE
+		WHERE COMMUB_NO	= #{commubNo}
+	</update>
+
+	<update id="communityBoardCnt" parameterType="int">
+		UPDATE
+		COMMUNITY_BOARD
+		SET COMMUB_CNT = COMMUB_CNT + 1
+		WHERE COMMUB_NO = #{commubNo}
+	</update>
+
+	<update id="communityBoardDelete" parameterType="CommunityBoardVo">
+		UPDATE COMMUNITY_BOARD
+		SET DELYN = 'Y'
+		WHERE COMMUB_NO = #{commubNo}
+	</update>
+	
+	<!-- 내가 작성한 게시글 리스트 조회 -->
+	<select id="getMyBoardList" parameterType="int" resultMap="CommunityBoardResultMap">
+    	SELECT B.*, M.MEM_NO, M.MEM_ID, M.MEM_NICK, C.COMMU_REGION
+    	FROM COMMUNITY_BOARD B
+    	LEFT JOIN MEMBER M ON B.MEM_NO = M.MEM_NO
+    	LEFT JOIN COMMUNITY C ON B.COMMU_NO = C.COMMU_NO
+    	WHERE B.MEM_NO = #{memNo}
+      	AND B.DELYN = 'N'
+      	AND C.DELYN = 'N'  -- 소모임이 삭제되지 않았는지 체크
+      	AND C.COMMU_NO IS NOT NULL
+    	ORDER BY B.CREATE_DATE DESC
+	</select>
+
+</mapper>

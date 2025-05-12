@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="member">
+	
+	<select id="memberLogin" parameterType="MemberVo" resultType="MemberVo">
+		SELECT 
+		    *
+		FROM MEMBER
+		WHERE MEM_ID = #{memId}
+		AND MEM_PASS = #{memPass}
+	</select>
+	
+	<select id="countId" parameterType="MemberVo" resultType="int">
+		SELECT
+			COUNT(MEM_NO)
+		FROM MEMBER
+		WHERE MEM_ID = #{memId}
+	</select>
+	
+	<select id="countNick" parameterType="MemberVo" resultType="int">
+		SELECT
+			COUNT(MEM_NO)
+		FROM MEMBER
+		WHERE MEM_NICK = #{memNick}
+	</select>
+	
+	<insert id="memberJoin" parameterType="MemberVo">
+		INSERT INTO MEMBER
+		    VALUES (
+		        (SELECT NVL(MAX(MEM_NO), 0) + 1 FROM MEMBER),
+		        #{memId},
+		        #{memPass},
+				#{memNick},
+		        #{memEmail},
+		        #{memTel},
+		        #{memAddr},
+		        #{memAddr1},
+		        #{memAddr2},
+		        '',
+		        0,
+		        'N',
+		        0,
+		        '',
+		        0,
+		        '',
+		        0,
+		        SYSDATE,
+		        '',
+		        (SELECT VERIFIED FROM EMAIL_VERIFICATION WHERE EMAIL = #{memEmail})
+		    )
+	
+	</insert>
+	
+	
+	<!-- 회원 등록 -->
+    <insert id="registerMember" parameterType="MemberVo">
+        INSERT INTO MEMBER (
+            MEM_ID,
+            MEM_PASS,
+            MEM_NAME,
+            MEM_EMAIL,
+            MEM_PHONE,
+            MEM_ADDR,
+            EMAIL_VERIFIED,
+            REG_DATE
+        ) VALUES (
+            #{memId},
+            #{memPass},
+            #{memName},
+            #{memEmail},
+            #{memPhone},
+            #{memAddr},
+            #{emailVerified, jdbcType=NUMERIC},
+            SYSDATE
+        )
+    </insert>
+    
+    <!-- 이메일로 회원 조회 -->
+    <select id="findMemberByEmail" parameterType="String" resultType="MemberVo">
+        SELECT 
+            MEM_ID AS memId,
+            MEM_PASS AS memPass,
+            MEM_NAME AS memName,
+            MEM_EMAIL AS memEmail,
+            MEM_PHONE AS memPhone,
+            MEM_ADDR AS memAddr,
+            EMAIL_VERIFIED AS emailVerified,
+            REG_DATE AS regDate
+        FROM MEMBER
+        WHERE MEM_EMAIL = #{email}
+    </select>
+    
+    <select id="findId" parameterType="MemberVo" resultType="String">
+    	SELECT
+		    MEM_ID
+		FROM MEMBER
+		WHERE MEM_EMAIL = #{memEmail}
+    </select>
+    
+    <select id="findPass" parameterType="MemberVo" resultType="String">
+    	SELECT
+		    MEM_EMAIL
+		FROM MEMBER
+		WHERE MEM_ID = #{memId}
+    </select>
+    
+    <update id="updatePass" parameterType="String">
+    	UPDATE MEMBER
+    	SET MEM_PASS = 'qwer1234'
+    	WHERE MEM_EMAIL = #{findEmail}
+    </update>
+    
+    <select id="findMemberByNo" parameterType="int" resultType="MemberVo">
+        SELECT * 
+        FROM MEMBER 
+        WHERE MEM_NO = #{memNo}
+    </select>
+    
+    <select id="store_memNo" parameterType="String" resultType="int">
+    	SELECT MEM_NO FROM MEMBER
+    	WHERE MEM_NICK = #{memNick}
+    </select>
+    
+    <insert id="storeInsert" parameterType="StoreVo">
+    	INSERT INTO STORE (MEM_NO, STORE_NAME) VALUES(#{memNo}, #{storeName})
+    </insert>
+	
+	
+</mapper>

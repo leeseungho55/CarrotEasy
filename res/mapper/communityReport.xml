@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="communityReport">
+
+	<select id="communityReportList" resultType="CommunityReportVo">
+    	SELECT 
+        	REPORT_NO,
+        	COMMU_NO,
+    	    REPORTER_MEM_NO,
+	        REPORT_CONTENT,
+        	REPORT_DATE,
+        	PROCESS_STATUS
+    	FROM COMMUNITY_REPORT
+    	WHERE DELYN = 'N'
+    	ORDER BY REPORT_DATE DESC
+	</select>
+
+	    <!-- 신고 내역 INSERT -->
+    <insert id="communityInsertReport" parameterType="CommunityReportVo">
+        INSERT INTO COMMUNITY_REPORT (
+            REPORT_NO,
+            COMMU_NO,
+            REPORTER_MEM_NO,
+            REPORT_CONTENT,
+            REPORT_DATE,
+            PROCESS_STATUS,
+            DELYN
+        ) VALUES (
+            COMMUNITY_REPORT_SEQ.NEXTVAL,
+            #{commuNo},
+            #{reporterMemNo},
+            #{reportContent},
+            SYSDATE,
+            '처리중',
+            'N'
+        )
+    </insert>
+    
+    <update id="communityDeleteReport" parameterType="CommunityReportVo">
+		UPDATE COMMUNITY_REPORT
+		SET DELYN = 'Y'
+		WHERE REPORT_NO = #{reportNo}
+	</update>
+
+    <!-- 신고 횟수 누적 UPDATE -->
+    <update id="communityUpdateReportCount" parameterType="int">
+        UPDATE COMMUNITY
+        SET REPORT_CNT = NVL(REPORT_CNT, 0) + 1,
+            LAST_REPORT_CONTENT = (
+                SELECT REPORT_CONTENT
+                FROM (
+                    SELECT REPORT_CONTENT
+                    FROM COMMUNITY_REPORT
+                    WHERE COMMU_NO = #{commuNo}
+                    ORDER BY REPORT_DATE DESC
+                ) WHERE ROWNUM = 1
+            )
+        WHERE COMMU_NO = #{commuNo}
+    </update>
+    
+    <!-- 신고 처리 상태 업데이트 -->
+    <update id="communityReportProcessStatus" parameterType="map">
+        UPDATE COMMUNITY_REPORT
+        SET PROCESS_STATUS = #{processStatus}
+        WHERE REPORT_NO = #{reportNo}
+    </update>
+
+</mapper>

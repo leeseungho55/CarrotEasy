@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="boardgood">
+
+	<!-- 좋아요 생성 -->
+	<insert id="insertBoardGood">
+		INSERT INTO COMMUNITY_BOARD_GOOD (GOOD_NO, COMMUB_NO, MEM_ID)
+		VALUES (SEQ_COMMUNITY_BOARD_GOOD.NEXTVAL, #{commubNo}, #{memId})
+	</insert>
+
+	<!-- 좋아요 삭제 -->
+	<delete id="deleteBoardGood">
+		DELETE FROM COMMUNITY_BOARD_GOOD
+		WHERE COMMUB_NO = #{commubNo}
+		AND MEM_ID = #{memId}
+	</delete>
+	
+	<!-- 좋아요 여부확인 -->
+	<select id="isBoardGood" resultType="int">
+		SELECT COUNT(*)
+		FROM COMMUNITY_BOARD_GOOD
+		WHERE COMMUB_NO = #{commubNo}
+		AND MEM_ID = #{memId}
+	</select>
+	
+	<!-- 좋아요 갯수 -->
+	<select id="countBoardGood" resultType="int">
+		SELECT COUNT(*)
+		FROM COMMUNITY_BOARD_GOOD
+		WHERE COMMUB_NO = #{commubNo}
+	</select>
+</mapper>

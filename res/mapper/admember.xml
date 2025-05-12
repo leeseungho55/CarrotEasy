@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="admember">
+	<select id="admemberLogin" resultType="AdmemberVo" parameterType="AdmemberVo">
+		SELECT *
+		FROM AD_MEMBER
+		WHERE AMEM_ID = #{amemId}
+		AND AMEM_PASS = #{amemPass}
+		AND AMEM_DELYN = 'N'
+	</select>
+	
+	<insert id="admemberJoin" parameterType="AdmemberVo">
+		INSERT INTO AD_MEMBER (AMEM_NO, AMEM_ID, AMEM_PASS, AMEM_REG_NO, AMEM_TEL, AMEM_DELYN, AMEM_EMAIL, AMEM_COMPANY, CREATE_DATE)
+		VALUES (AD_MEMBER_AMEM_NO_SEQ.NEXTVAL, #{amemId}, #{amemPass}, #{amemRegNo}, #{amemTel}, 'N', #{amemEmail}, #{amemCompany}, SYSDATE)
+	</insert>
+	
+	<select id="countRegNo" parameterType="AdmemberVo" resultType="int">
+		SELECT COUNT(*) FROM AD_MEMBER WHERE AMEM_REG_NO = #{amemRegNo}
+	</select>
+	
+	<select id="countId" parameterType="AdmemberVo" resultType="int">
+		SELECT COUNT(*) FROM AD_MEMBER WHERE AMEM_ID = #{amemId}
+	</select>
+	
+	<select id="getAdmemberByNo" parameterType="int" resultType="AdmemberVo">
+		SELECT * FROM AD_MEMBER WHERE AMEM_NO = #{amemNo}
+	</select>
+</mapper>

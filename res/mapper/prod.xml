@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prod">
+
+	<select id="prodMainRecentlyList" resultType="ProdVo">
+		SELECT *
+		FROM PROD
+		WHERE PROD_DELYN = 'N'
+		AND PROD_TYPE = 'FOR_SALE'
+		ORDER BY PROD_NO DESC
+		FETCH FIRST 10 ROWS ONLY
+	</select>
+
+	<select id="prodMainBestList" resultType="ProdVo">
+		SELECT p.*
+		FROM (
+		    SELECT J.PROD_NO, COUNT(*) AS like_count
+		    FROM jjim J
+		    GROUP BY J.PROD_NO
+		    ORDER BY like_count DESC
+		) zz
+		JOIN PROD p ON zz.PROD_NO = p.PROD_NO
+		WHERE p.PROD_DELYN = 'N'
+		AND PROD_TYPE = 'FOR_SALE' 
+		<![CDATA[
+		AND ROWNUM <= 10 
+		]]>
+	</select>
+
+	<select id="prodList" resultType="ProdVo">
+		SELECT *
+		FROM PROD
+		WHERE PROD_DELYN = 'N'
+		ORDER BY CREATE_DATE DESC
+	</select>
+	
+	<insert id="prodInsert" parameterType="ProdVo">
+	    INSERT INTO PROD (PROD_NO, MEM_NO, CATE_NO, AREA_NO, PROD_TITLE, PROD_CONTENT, PROD_PRICE, PROD_LOCATION, PROD_CNT, PROD_TYPE, PROD_STATUS, CREATE_DATE, PROD_DELYN)
+	    VALUES ((SELECT NVL(MAX(PROD_NO), 0) + 1 FROM PROD), #{memNo}, #{cateNo}, #{areaNo}, #{prodTitle}, #{prodContent}, #{prodPrice}, #{prodLocation}, 0, #{prodType}, #{prodStatus}, SYSDATE, 'N')
+	</insert>
+	
+	<select id="getLastInsertedProdNo" resultType="int">
+	    SELECT MAX(PROD_NO) FROM PROD
+	</select>
+	
+	<select id="getProdByNo" parameterType="int" resultType="ProdVo">
+	    SELECT 
+	        p.PROD_NO,
+	        p.MEM_NO,
+	        p.PROD_TITLE,
+	        p.PROD_CONTENT,
+	        p.PROD_PRICE,
+	        p.PROD_LOCATION,
+	        p.PROD_CNT,
+	        p.CREATE_DATE,
+	        p.PROD_TYPE,
+	        p.PROD_STATUS,
+	        p.CATE_NO,
+	        p.AREA_NO,
+	        c.CATE_NAME,
+	        a.AREA_NAME
+	    FROM 
+	        PROD p
+	        LEFT JOIN CATEGORY c ON p.CATE_NO = c.CATE_NO
+	        LEFT JOIN AREA a ON p.AREA_NO = a.AREA_NO
+	    WHERE p.PROD_NO = #{prodNo}
+	</select>
+	
+	<select id="getProdListWithFilters" parameterType="map" resultType="ProdVo">
+	    SELECT 
+	        p.PROD_NO,
+	        p.MEM_NO,
+	        p.PROD_TITLE,
+	        p.PROD_CONTENT,
+	        p.PROD_PRICE,
+	        p.PROD_LOCATION,
+	        p.CREATE_DATE,
+	        p.PROD_TYPE,
+	        p.PROD_STATUS,
+	        p.CATE_NO,
+	        p.AREA_NO,
+	        c.CATE_NAME,
+	        a.AREA_NAME
+	    FROM 
+	        PROD p
+	        LEFT JOIN CATEGORY c ON p.CATE_NO = c.CATE_NO
+	        LEFT JOIN AREA a ON p.AREA_NO = a.AREA_NO
+	    WHERE 
+	        p.PROD_DELYN = 'N'
+	        AND PROD_TYPE = 'FOR_SALE'
+	        <if test="cateNoList != null and cateNoList.size() > 0">
+	            AND p.CATE_NO IN
+	            <foreach collection="cateNoList" item="cateNo" open="(" separator="," close=")">
+	                #{cateNo}
+	            </foreach>
+	        </if>
+	        <if test="areaNoList != null and areaNoList.size() > 0">
+	            AND p.AREA_NO IN
+	            <foreach collection="areaNoList" item="areaNo" open="(" separator="," close=")">
+	                #{areaNo}
+	            </foreach>
+	        </if>
+	        <if test="keyword != null and keyword != ''">
+	            AND (
+	                p.PROD_TITLE LIKE '%' || #{keyword} || '%' OR
+	                p.PROD_CONTENT LIKE '%' || #{keyword} || '%'
+	            )
+	        </if>
+	    ORDER BY p.CREATE_DATE DESC
+	</select>
+	
+	<update id="prodUpdate" parameterType="ProdVo">
+	    UPDATE PROD
+	    SET PROD_TITLE = #{prodTitle},
+	        PROD_CONTENT = #{prodContent},
+	        PROD_PRICE = #{prodPrice},
+	        PROD_TYPE = #{prodType.code},
+	        PROD_STATUS = #{prodStatus.code},
+	        UPDATE_DATE = SYSDATE
+	    WHERE PROD_NO = #{prodNo}
+  	</update>
+  	
+  	<update id="prodCntUpdate" parameterType="int">
+	    UPDATE PROD
+	    SET PROD_CNT = PROD_CNT + 1
+	    WHERE PROD_NO = #{prodNo}
+	</update>
+  	
+  	<update id="prodDelete" parameterType="int">
+	    UPDATE PROD
+	    SET PROD_DELYN = 'Y',
+	        UPDATE_DATE = SYSDATE
+	    WHERE PROD_NO = #{prodNo}
+	</update>
+</mapper>

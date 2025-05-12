@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="delivery">
+	<insert id="deliverySave" parameterType="DeliveryVo">
+		INSERT INTO DELIVERY (DELI_NO, PAY_NO, DELI_ID, DELI_TYPE, DELI_STATUS, DELI_PRICE, RECIPIENT_NAME, RECIPIENT_TEL, DELI_ADDRESS, DELI_MESSAGE, PAYMENT_TYPE, SENDER_NO, PROD_NO, CREATE_DATE)
+		VALUES ((SELECT NVL(MAX(DELI_NO), 0) + 1 FROM DELIVERY), #{payNo}, #{deliId}, #{deliType}, #{deliStatus}, #{deliPrice}, #{recipientName}, #{recipientTel}, #{deliAddress}, #{deliMessage}, #{paymentType}, #{senderNo}, #{prodNo}, SYSDATE)
+	</insert>
+	
+	<update id="deliveryStatusUpdate" parameterType="DeliveryVo">
+		UPDATE DELIVERY SET DELI_STATUS = #{deliStatus} WHERE DELI_ID = #{deliId}
+	</update>
+	
+	<select id="getDeliveryStatus" parameterType="String" resultType="String">
+		SELECT DELI_STATUS FROM DELIVERY WHERE DELI_ID = #{data}
+	</select>
+	
+	<select id="getDeliId" parameterType="int" resultType="String">
+		SELECT DELI_ID FROM DELIVERY WHERE PROD_NO = #{data}
+	</select>
+	
+</mapper>

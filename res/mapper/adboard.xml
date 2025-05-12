@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="adboard">
+
+	<select id="adboardList" resultType="AdboardVo">
+		SELECT *
+		FROM AD_BOARD
+		WHERE AD_DELYN = 'N'
+		ORDER BY AD_NO DESC
+	</select>
+	
+	<insert id="adboardWrite" parameterType="AdboardVo">
+		INSERT INTO AD_BOARD (AD_NO, AMEM_NO, AD_TITLE, AD_CONTENT, AD_IMG, AD_URL, AD_PASS, CREATE_DATE, AD_DELYN)
+		VALUES ((SELECT NVL(MAX(AD_NO), 0) + 1 FROM AD_BOARD), #{amemNo}, #{adTitle}, #{adContent}, #{adImg}, #{adUrl}, #{adPass}, SYSDATE, 'N')
+	</insert>
+	
+	<select id="getBoard" parameterType="int" resultType="AdboardVo">
+		SELECT *
+		FROM AD_BOARD
+		WHERE AD_NO = #{adNo}
+		AND AD_DELYN = 'N'
+	</select>
+	
+	<select id="getAdForSwiper" resultType="SwiperAdVo">
+		SELECT AD_NO AS adNo, AD_IMG AS adImg, AD_URL AS adUrl
+		FROM AD_BOARD
+		WHERE AD_CONFIRM = 'Y'
+	</select>
+	
+	<update id="adboardUpdate" parameterType="AdboardVo">
+	    UPDATE AD_BOARD
+	    SET AD_TITLE = #{adTitle},
+	        AD_CONTENT = #{adContent},
+	        AD_IMG = #{adImg, jdbcType=VARCHAR},
+	        AD_URL = #{adUrl},
+	        UPDATE_DATE = SYSDATE
+	    WHERE AD_NO = #{adNo}
+  	</update>
+  	
+  	<update id="adboardDelete" parameterType="int">
+	    UPDATE AD_BOARD
+	    SET AD_DELYN = 'Y',
+	        UPDATE_DATE = SYSDATE
+	    WHERE AD_NO = #{adNo}
+	</update>
+	
+	<update id="updateAdBoardConfirm" parameterType="AdboardVo">
+		UPDATE AD_BOARD
+		SET AD_CONFIRM = #{adConfirm}
+		WHERE AD_NO = #{adNo}
+	</update>
+	
+	<update id="adBoardConfirm" parameterType="int">
+		UPDATE AD_BOARD
+		SET AD_CONFIRM ='Y'
+		WHERE AD_BO = #{adNo};
+	</update>
+	
+	
+</mapper>

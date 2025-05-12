@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mystore">
+	
+	<update id="profileUpdate" parameterType="ProfileVo">
+		UPDATE MEMBER
+			SET MEM_IMG = #{memImg}
+		WHERE MEM_NO = #{memNo}
+	</update>
+	
+	<select id="sessionUpdate" parameterType="int" resultType="MemberVo">
+		SELECT * FROM MEMBER
+		WHERE MEM_NO = #{memNo}
+	</select>
+	
+	<select id="appendProfile" parameterType="int" resultType="MemberVo">
+		SELECT
+			*
+		FROM MEMBER
+		WHERE MEM_NO = #{memNo}
+	</select>
+	
+	<!-- 상점 정보 -->
+	<select id="storeInfo" parameterType="int" resultType="StoreVo">
+		SELECT * FROM STORE
+		WHERE MEM_NO = #{memNo}
+	</select>
+	
+	<!-- 상점 오픈일 -->
+	<select id="storeOpenDay" parameterType="int" resultType="int">
+		SELECT
+			TRUNC(SYSDATE - CREATE_DATE) AS OPENDAY
+		FROM MEMBER
+		WHERE MEM_NO = #{memNo}
+	</select>
+	
+	<!-- 상점 방문수 update -->
+	<update id="storeVisitUpdateCnt" parameterType="int">
+		UPDATE STORE
+			SET STORE_VISIT_CNT = STORE_VISIT_CNT + 1
+		WHERE MEM_NO = #{memNo}
+	</update>
+	<!-- 상점 방문수 select -->
+	<select id="storeVisitCnt" parameterType="int" resultType="int">
+		SELECT
+			MAX(STORE_VISIT_CNT) AS STORE_VISIT_CNT
+		FROM STORE
+		WHERE MEM_NO = #{memNo}
+	</select>
+	
+	
+	<!-- 상점 상품판매 -->
+	<select id="storeProdSellCnt" parameterType="int" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM PROD
+		WHERE PROD_TYPE = 'SOLD_OUT'
+		AND MEM_NO = #{memNo}
+	</select>
+	
+	<!-- 상품 전체 갯수 -->
+	<select id="storeProdAllCnt" parameterType="int" resultType="int">
+		SELECT
+			COUNT(*) AS PRODALLCNT
+		FROM PROD
+		WHERE MEM_NO = #{memNo}
+	</select>
+	
+	<!-- 내상점 상품 찜 전체 갯수 -->
+	<select id="storeJjimAllCnt" parameterType="int" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM JJIM
+		WHERE MEM_NO = #{memNo}
+	</select>
+	
+	<!-- 내상점 상품 찜 전체 갯수 -->
+	<select id="storeReviewAllCnt" parameterType="int" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM REVIEW
+		WHERE PROD_NO IN(SELECT PROD_NO FROM PROD WHERE PROD_TYPE = 'SOLD_OUT' AND MEM_NO = #{memNo})
+	</select>
+	
+	<!-- 내상점 상품 판매중 리스트 -->
+	<select id="storeProdForSale" parameterType="int" resultType="ProdVo">
+		SELECT
+			*
+		FROM PROD
+		WHERE PROD_TYPE = 'FOR_SALE'
+		AND MEM_NO = #{memNo}
+	</select>
+	
+	<!-- 내상점 상품 예약중 리스트 -->
+	<select id="storeProdReserved" parameterType="int" resultType="ProdVo">
+		SELECT
+			*
+		FROM PROD
+		WHERE PROD_TYPE = 'RESERVED'
+		AND MEM_NO = #{memNo}
+	</select>
+	
+	<!-- 내상점 상품 판매완료 리스트 -->
+	<select id="storeProdSoldOut" parameterType="int" resultType="ProdVo">
+		SELECT
+			*
+		FROM PROD
+		WHERE PROD_TYPE = 'SOLD_OUT'
+		AND MEM_NO = #{memNo}
+	</select>
+	
+	<!-- 내상점 구매 리스트 -->
+	<select id="storePurchaseList" parameterType="int" resultType="ProdVo">
+		SELECT
+			*
+		FROM PROD
+		WHERE PROD_NO IN(SELECT PROD_NO FROM PROD_PURCHASE WHERE MEM_NO = #{memNo})
+	</select>
+	
+	<!-- 내상점 상품 회원번호 -->
+	<select id="prodmemNo" parameterType="int" resultType="ProdVo">
+		SELECT
+			*
+		FROM PROD
+		WHERE PROD_NO = #{prodNo}
+	</select>
+	
+	<!-- 내상점 찜한 상품 리스트 -->
+	<select id="storeJjimList" parameterType="int" resultType="ProdVo">
+		SELECT
+			*
+		FROM PROD
+		WHERE PROD_NO IN (SELECT PROD_NO FROM JJIM WHERE MEM_NO = #{memNo})
+	</select>
+	
+	<!-- 내상점 상점명 수정 -->
+	<update id="storeNameUpdate" parameterType="StoreVo">
+		UPDATE STORE
+		    SET STORE_NAME = #{storeName}
+		WHERE MEM_NO = #{memNo}
+	</update>
+	
+	<!-- 내상점 상점내용 수정 -->
+	<update id="storeContentUpdate" parameterType="StoreVo">
+		UPDATE STORE
+		    SET STORE_CONTENT = #{storeContent}
+		WHERE MEM_NO = #{memNo}
+	</update>
+	
+	
+	<!-- 내상점 리뷰 리스트 -->
+	<select id="storeReviewList" parameterType="int" resultType="ReviewVo">
+		SELECT
+			*
+		FROM REVIEW
+		WHERE PROD_NO IN(SELECT PROD_NO FROM PROD WHERE PROD_TYPE = 'SOLD_OUT' AND MEM_NO = #{memNo})
+	</select>
+	
+	<!-- 내상점 리뷰 상품 제목 가져오기 -->
+	<select id="storeReviewProdTitle" parameterType="int" resultType="String">
+		SELECT
+			PROD_TITLE
+		FROM PROD WHERE PROD_NO = #{prodNo}
+	</select>
+	
+	<!-- 내상점 리뷰 구매자 닉네임 가져오기 -->
+	<select id="storeReviewBuyerNick" parameterType="int" resultType="String">
+		SELECT
+			MEM_NICK
+		FROM MEMBER
+		WHERE MEM_NO = #{memNo}
+	</select>
+	
+	
+	<!-- 내상점 리뷰 평균 -->
+	<select id="storeReviewAvg" parameterType="int" resultType="int">
+		SELECT 
+		
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

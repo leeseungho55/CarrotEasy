@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prod_image">
+	<insert id="prodImageInsert" parameterType="ProdImageVo">
+		INSERT INTO PROD_IMAGES (PROD_NO, FILE_NO)
+        VALUES (#{prodNo}, #{fileNo})
+	</insert>
+	
+	<select id="getProdImagesByProdNo" parameterType="int" resultType="ProdImageVo" useCache="false">
+	    SELECT PROD_NO, FILE_NO
+	    FROM PROD_IMAGES
+	    WHERE PROD_NO = #{prodNo}
+	    ORDER BY FILE_NO
+	</select>
+	
+	<delete id="prodImageDelete" parameterType="int">
+        DELETE FROM PROD_IMAGES 
+        WHERE FILE_NO = #{fileNo}
+    </delete>
+    
+    <delete id="prodImageDeleteAll" parameterType="int">
+    	DELETE FROM PROD_IMAGES
+    	WHERE PROD_NO = #{prodNo}
+    </delete>
+</mapper>

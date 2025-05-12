@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="review">
+
+<select id="listReview" parameterType="int" resultType="ReviewVo">
+	SELECT *
+	FROM REVIEW
+	WHERE PROD_NO IN (
+	    SELECT PROD_NO
+	    FROM PROD
+	    WHERE MEM_NO = #{prodMemNo}
+	)
+	ORDER BY CREATE_DATE DESC
+</select>
+
+<select id="getProdMemNo" parameterType="int" resultType="GetSellerVo">
+	SELECT MEM_NO
+	FROM PROD
+	WHERE PROD_NO =#{memNo};
+</select>
+
+<select id="hasReview" parameterType="HasReviewVo" resultType="boolean">
+	SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+	FROM REVIEW
+	WHERE PROD_NO = #{prodNo}
+	  AND MEM_NO = #{memNo}
+</select>
+
+<select id="isPurchased" parameterType="int" resultType="int">
+	SELECT MEM_NO
+	FROM PROD_PURCHASE
+	WHERE PROD_NO = #{prodNo}
+</select>
+
+<insert id="insertProdReview" parameterType="ReviewVo">
+	INSERT INTO REVIEW
+	VALUES (#{prodNo},#{memNo},#{reviewScore},#{reviewTitle},SYSDATE)
+</insert>
+
+<delete id="deleteRiview" parameterType="int">
+	DELETE FROM REVIEW
+	WHERE PROD_NO = #{prodNo}
+</delete>
+
+
+
+</mapper>

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="community">
+
+	<resultMap id="communityWithMemberMap" type="CommunityVo">
+		<id property="commuNo" column="commu_no" />
+		<result property="memNo" column="mem_no" />
+		<result property="commuTitle" column="commu_title" />
+		<result property="commuContent" column="commu_content" />
+		<result property="commuCatrgory" column="commu_catrgory" />
+		<result property="createDate" column="create_date" />
+		<result property="updateDate" column="update_date" />
+		<result property="delyn" column="delyn" />
+		<result property="commuRegion" column="commu_region" />
+		<result property="reportCnt" column="report_cnt" />
+		<result property="lastReportContent" column="last_report_content" />
+		<result property="commuBoardCount" column="commu_board_count" />
+
+		<association property="member"
+			javaType="MemberVo">
+			<id property="memNo" column="member_mem_no" />
+			<result property="memId" column="member_mem_id" />
+			<result property="memNick" column="member_mem_nick" />
+			<!-- 필요에 따라 추가 필드 매핑 -->
+		</association>
+	</resultMap>
+
+	<!-- 동적쿼리 -->
+	<sql id="dynamicCondition">
+		<choose>
+			<when test="stype eq 'commuTitle'">
+				AND COMMU_TITLE LIKE '%' || #{sword} || '%'
+			</when>
+			<when test="stype eq 'commuContent'">
+				AND COMMU_CONTENT LIKE '%' || #{sword} || '%'
+			</when>
+			<when test="stype eq 'memNick'">
+				AND m.MEM_NICK LIKE '%' || #{sword} || '%'
+			</when>
+			<otherwise>
+				AND 1 = 1
+			</otherwise>
+		</choose>
+	</sql>
+
+	<!-- 페이징처리 -->
+	<select id="communityListPage" resultType="map"
+		parameterType="CommunityVo">
+			SELECT A.* FROM
+				(SELECT ROWNUM AS RNUM , B.* FROM
+					( SELECT * FROM COMMUNITY
+				<include refid="dynamicCondition" />
+						ORDER BY COMMU_NO DESC ) B
+    	<![CDATA[
+        	  WHERE ROWNUM <= #{end}) A
+     	  WHERE A.RNUM >= #{start}
+    	 ]]>
+	</select>
+
+	<!-- 전체 글리스트 갯수까지 불러오기 -->
+	<select id="communityList" parameterType="String" resultMap="communityWithMemberMap">
+		SELECT
+        C.COMMU_NO,
+        C.MEM_NO,
+        C.COMMU_TITLE,
+        C.COMMU_CONTENT,
+        C.COMMU_CATRGORY,
+        C.CREATE_DATE,
+        C.UPDATE_DATE,
+        C.DELYN,
+        C.COMMU_REGION,
+        NVL(B.BOARD_COUNT, 0) AS COMMU_BOARD_COUNT,
+        C.REPORT_CNT,
+        C.LAST_REPORT_CONTENT,
+        M.MEM_NO AS MEMBER_MEM_NO,
+        M.MEM_ID AS MEMBER_MEM_ID,
+        M.MEM_NICK AS MEMBER_MEM_NICK
+    FROM COMMUNITY c
+    LEFT JOIN (
+        SELECT COMMU_NO, COUNT(*) AS BOARD_COUNT
+        FROM COMMUNITY_BOARD
+        WHERE DELYN = 'N'
+        GROUP BY COMMU_NO
+    ) B ON C.COMMU_NO = B.COMMU_NO
+    JOIN MEMBER M ON C.MEM_NO = M.MEM_NO
+    WHERE C.COMMU_REGION = #{commuRegion, jdbcType=VARCHAR}
+      AND C.DELYN = 'N'
+      AND NOT EXISTS (
+          SELECT 1 FROM COMMUNITY_REPORT R
+          WHERE R.COMMU_NO = C.COMMU_NO
+            AND R.PROCESS_STATUS = '승인'
+      )
+	</select>
+
+	<!-- 지역, 카테고리 -->
+	<select id="getRegionList" parameterType="map" resultMap="communityWithMemberMap">
+		SELECT
+			c.commu_no,
+			c.mem_no,
+			c.commu_title,
+			c.commu_content,
+			c.commu_catrgory,
+			c.create_date,
+			c.update_date,
+			c.delyn,
+			c.commu_region,
+			NVL(b.board_count, 0) AS commu_board_count,
+			c.report_cnt,
+    		c.last_report_content,
+			m.mem_no AS member_mem_no,
+			m.mem_id AS member_mem_id,
+			m.mem_nick AS member_mem_nick
+		FROM COMMUNITY c
+		LEFT JOIN (
+			SELECT commu_no, COUNT(*) AS board_count
+			FROM COMMUNITY_BOARD
+			WHERE DELYN = 'N'
+			GROUP BY commu_no
+			) b ON c.commu_no = b.commu_no
+		JOIN MEMBER m ON c.mem_no = m.mem_no
+    	WHERE c.COMMU_REGION = #{commuRegion, jdbcType=VARCHAR}
+   		 AND c.DELYN = 'N'
+   		 AND NOT EXISTS (
+        	SELECT 1 FROM COMMUNITY_REPORT r
+        	WHERE r.COMMU_NO = c.COMMU_NO
+         	AND r.PROCESS_STATUS = '승인'
+    	)
+    	<if test="commuCatrgory != null and commuCatrgory != ''">
+        	AND c.COMMU_CATRGORY = #{commuCatrgory, jdbcType=VARCHAR}
+    	</if>
+    <include refid="dynamicCondition" />
+	</select>
+
+	<!-- 글쓰기 -->
+	<insert id="communityInsert" parameterType="CommunityVo">
+		INSERT INTO COMMUNITY (
+							COMMU_NO,
+							MEM_NO,
+							COMMU_TITLE,
+							COMMU_CONTENT,
+							COMMU_CATRGORY,
+							CREATE_DATE,
+							UPDATE_DATE,
+							DELYN,
+							COMMU_REGION,
+							REPORT_CNT,
+							LAST_REPORT_CONTENT
+					) VALUES (
+						COMMUNITY_SEQ.NEXTVAL,
+						#{memNo},
+						#{commuTitle},
+						#{commuContent},
+						#{commuCatrgory},
+						SYSDATE,
+						SYSDATE,
+						'N',
+						#{commuRegion},
+						0,
+						NULL
+		)
+	</insert>
+
+	<update id="communityUpdate" parameterType="CommunityVo">
+		UPDATE COMMUNITY
+		SET
+		COMMU_TITLE = #{commuTitle},
+		COMMU_CONTENT = #{commuContent},
+		COMMU_CATRGORY = #{commuCatrgory, jdbcType=VARCHAR},
+		UPDATE_DATE = SYSDATE
+		WHERE COMMU_NO = #{commuNo}
+	</update>
+
+	<!-- 상세조회 -->
+	<select id="communityByNo" parameterType="int"
+		resultMap="communityWithMemberMap">
+			SELECT
+			c.commu_no,
+			c.mem_no,
+			c.commu_title,
+			c.commu_content,
+			c.commu_catrgory,
+			c.create_date,
+			c.update_date,
+			c.delyn,
+			c.commu_region,
+			NVL(b.board_count, 0) AS commu_board_count,
+			c.report_cnt,
+    		c.last_report_content,
+			m.mem_no AS member_mem_no,
+			m.mem_id AS member_mem_id,
+			m.mem_nick AS member_mem_nick
+		FROM COMMUNITY c
+		LEFT JOIN (
+			SELECT commu_no, COUNT(*) AS board_count
+			FROM COMMUNITY_BOARD
+			WHERE DELYN = 'N'
+			GROUP BY commu_no
+			) b ON c.commu_no = b.commu_no
+				JOIN MEMBER m ON c.mem_no = m.mem_no
+				WHERE c.COMMU_NO = #{commuNo}
+	</select>
+
+	<update id="communityDelete" parameterType="CommunityVo">
+		UPDATE COMMUNITY
+		SET	DELYN = 'Y'
+		WHERE COMMU_NO = #{commuNo}
+	</update>
+	
+	<update id="communityReport" parameterType="map">
+    	UPDATE COMMUNITY
+    	SET REPORT_CNT = NVL(REPORT_CNT, 0) + 1,
+        	LAST_REPORT_CONTENT = #{lastReportContent}
+    	WHERE COMMU_NO = #{commuNo}
+	</update>
+	
+	<select id="findCommunityByNo" parameterType="int" resultType="CommunityVo">
+        SELECT * 
+        FROM COMMUNITY 
+        WHERE COMMU_NO = #{commuNo}
+    </select>
+    
+    <!-- 내가 만든 소모임 조회 -->
+	<select id="communityByCreatList" parameterType="int" resultMap="communityWithMemberMap">
+    	SELECT
+        	C.COMMU_NO,
+        	C.MEM_NO,
+        	C.COMMU_TITLE,
+        	C.COMMU_CONTENT,
+        	C.COMMU_CATRGORY,
+        	C.CREATE_DATE,
+        	C.UPDATE_DATE,
+        	C.DELYN,
+        	C.COMMU_REGION,
+        	NVL(B.BOARD_COUNT, 0) AS COMMU_BOARD_COUNT,
+        	C.REPORT_CNT,
+        	C.LAST_REPORT_CONTENT,
+        	M.MEM_NO AS MEMBER_MEM_NO,
+        	M.MEM_ID AS MEMBER_MEM_ID,
+        	M.MEM_NICK AS MEMBER_MEM_NICK
+    	FROM COMMUNITY C
+    	LEFT JOIN (
+        	SELECT COMMU_NO, COUNT(*) AS BOARD_COUNT
+        	FROM COMMUNITY_BOARD
+        	WHERE DELYN = 'N'
+        	GROUP BY COMMU_NO
+    	) B ON C.COMMU_NO = B.COMMU_NO
+    	JOIN MEMBER M ON C.MEM_NO = M.MEM_NO
+    	WHERE C.MEM_NO = #{memNo}
+    	AND C.DELYN = 'N'
+    	ORDER BY C.CREATE_DATE DESC
+	</select>
+
+</mapper>

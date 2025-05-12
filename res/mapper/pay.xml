@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pay">
+
+	<insert id="insertPay" parameterType="PaymentDataVo">
+		INSERT INTO PAY 
+		VALUES((SELECT NVL(MAX(PAY_NO), 0) + 1 FROM PAY),#{memNo},#{prodNo},SYSDATE,#{payType})
+	</insert>
+
+	<update id="changeProdType" parameterType="int">
+		UPDATE PROD
+		SET PROD_TYPE = 'RESERVED'
+		WHERE PROD_NO =#{prodNo}
+	</update>
+	
+	<select id="findPayNoByProdAndMember" parameterType="PaymentDataVo" resultType="int">
+		SELECT PAY_NO FROM PAY WHERE PROD_NO = #{prodNo} AND PAY_TYPE = '일반구매'
+	</select>
+</mapper>

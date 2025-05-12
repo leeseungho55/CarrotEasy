@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="emailVerification">
+    
+    <!-- 인증 코드 저장 -->
+    <insert id="saveVerificationCode" parameterType="EmailVerificationVo">
+        MERGE INTO EMAIL_VERIFICATION
+        USING DUAL
+        ON (EMAIL = #{email})
+        WHEN MATCHED THEN
+            UPDATE SET
+                VERIFICATION_CODE = #{verificationCode},
+                CREATED_AT = SYSDATE,
+                EXPIRES_AT = #{expiresAt, jdbcType=TIMESTAMP},
+                VERIFIED = 0
+        WHEN NOT MATCHED THEN
+            INSERT (
+                EMAIL,
+                VERIFICATION_CODE,
+                CREATED_AT,
+                EXPIRES_AT,
+                VERIFIED
+            ) VALUES (
+                #{email},
+                #{verificationCode},
+                SYSDATE,
+                #{expiresAt, jdbcType=TIMESTAMP},
+                0
+            )
+    </insert>
+    
+    <!-- 이메일과 인증 코드가 일치하는지 확인 -->
+    <select id="verifyCode" parameterType="map" resultType="EmailVerificationVo">
+        SELECT
+            EMAIL AS email,
+            VERIFICATION_CODE AS verificationCode,
+            CREATED_AT AS createdAt,
+            EXPIRES_AT AS expiresAt,
+            VERIFIED AS verified
+        FROM EMAIL_VERIFICATION
+        WHERE EMAIL = #{email}
+        AND VERIFICATION_CODE = #{code}
+        AND EXPIRES_AT > SYSDATE
+        AND VERIFIED = 0
+    </select>
+    
+    <!-- 인증 상태 업데이트 -->
+    <update id="updateVerificationStatus" parameterType="String">
+        UPDATE EMAIL_VERIFICATION
+        SET VERIFIED = 1
+        WHERE EMAIL = #{email}
+    </update>
+    
+    <!-- 이메일 인증 상태 확인 -->
+    <select id="isEmailVerified" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM EMAIL_VERIFICATION
+        WHERE EMAIL = #{email}
+        AND VERIFIED = 1
+    </select>
+</mapper>

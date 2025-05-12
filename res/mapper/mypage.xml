@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mypage">
+
+	<update id="profileUpdate" parameterType="MemberVo">
+		UPDATE MEMBER
+		SET MEM_PASS = #{memPass}, MEM_TEL = #{memTel}
+		WHERE MEM_ID = #{memId}
+	</update>
+	
+	<update id="profileUpdateAd" parameterType="AdmemberVo">
+		UPDATE AD_MEMBER
+		SET AMEM_ID = #{amemId}, AMEM_PASS = #{amemPass}, AMEM_TEL = #{amemTel}
+		WHERE AMEM_ID = #{amemId}
+	</update>
+	
+</mapper>
