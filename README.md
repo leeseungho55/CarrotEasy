@@ -25,22 +25,9 @@
 | Frontend | HTML, CSS, JavaScript, jQuery |
 | Database | Oracle SQL |
 | Real-time | WebSocket |
-| Payment | KakaoPay (PortOne API 연동) |
+| Payment | KakaoPay (PortOne API 연동) | KakaoQuick
 | Version Control | SVN | Redmine
 | IDE | Eclipse |
-
-
-## 📂 프로젝트 구조 예시
-
-CarrotEasy/
-├── src/
-│ ├── main/
-│ │ ├── java/ (Controller, Service, DAO)
-│ │ └── webapp/ (JSP, JS, CSS, Image)
-├── docs/ (산출물: 요구사항정의서, ERD, 발표자료 등)
-├── README.md
-└── .gitignore
-
 
 ---
 
